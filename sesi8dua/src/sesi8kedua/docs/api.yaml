@@ -1,0 +1,218 @@
+openapi: 3.0.0
+  
+info:
+  contact:
+    name: Hacktiv8
+    email: support@hacktiv8.com
+  description: |
+    
+  version: 2.0.0
+  title: |
+    Hacktiv8 - Ordrs
+
+paths:
+  /v1/ping:
+    get:
+      tags:
+        - Health Check
+      summary: Server heartbeat operation
+      description: >-
+        Ping and general health check
+      operationId: ping
+      security: []
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-Trace-ID:
+              schema:
+                type: string
+                format: uuid
+          content:
+            # TODO: Discuss
+            text/plain:
+              example: OK
+        
+  # TODO: Discuss machine-to-machine authentication methods if needed
+        
+  /v1/value:
+    post:
+      tags:
+        - Value
+      summary: Store new value
+      operationId: postValue
+      parameters:
+        - in: header
+          name: X-Trace-ID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                category:
+                  type: string
+                  example: "category-product"
+                value:
+                  type: string
+                  example: "uuid"
+      responses:
+        '200':
+          description: 200 OK
+          headers:
+            X-Trace-Id:
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    # TODO: Discuss format, but one thing for sure, it should be unique
+                    format: uuid
+                  category:
+                    type: string
+                    example: "category-product"
+                  stok:
+                    type: number
+                    example: 100
+        '400':
+          description: 400 Bad Request
+          headers:
+            X-Trace-Id:
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    example: 'BAD_REQUEST'
+                  message:
+                    type: string
+                    example: 'Failed to parse value'
+        '500':
+          description: 500 Internal Server Error
+          headers:
+            X-Trace-Id:
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    example: 'INTERNAL_SERVER_ERROR'
+                  message:
+                    type: string
+                    example: 'Failed to store value'
+
+  /v1/value/{id}:
+    get:
+      tags:
+        - Value
+      summary: Get stored value
+      operationId: getValueByID
+      parameters:
+        - in: header
+          name: X-Trace-ID
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: Pagination
+          schema:
+            type: number
+        - in: path
+          name: id
+          schema:
+            type: string
+            # TODO: Discuss format (see notes above)
+            format: uuid
+          required: true
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-Trace-Id:
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  category:
+                    type: string
+                    example: "order"
+                  value:
+                    type: string
+                    example: "{\"foo\":\"bar\"}"
+        '400':
+          description: 400 Bad Request
+          headers:
+            X-Trace-Id:
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    example: 'BAD_REQUEST'
+                  message:
+                    type: string
+                    example: 'Must specify value ID'
+        '404':
+          description: 400 Bad Request
+          headers:
+            X-Trace-Id:
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    example: 'VALUE_NOT_FOUND'
+                  message:
+                    type: string
+                    example: 'No value stored with the specified ID'
+        '500':
+          description: 500 Internal Server Error
+          headers:
+            X-Trace-Id:
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    example: 'INTERNAL_SERVER_ERROR'
+                  message:
+                    type: string
+                    example: 'Failed to retrieve value with the specified ID'
